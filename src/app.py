@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
-from api.models import db
+from api.models import db, User
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
@@ -75,6 +75,25 @@ def serve_any_other_file(path):
     response.cache_control.max_age = 0  # avoid cache memory
     return response
 
+
+@app.route('/login', methods=['POST'])
+def login():
+    body= request.get_json(silent=True)
+    if body is None:
+        return jsonify({'msg':'Debes enviar la informacion en el body'}),400
+    if 'email' not in body:
+        return jsonify({'msg':'El campo email es requerido'}),400
+    if 'password' not in body:
+        return jsonify({'msg':'El campo password es requerido'}),400
+    user = User.query.filter_by(email=body['email']).first() 
+    if user is None:
+        return jsonify({'msg':'Usuario o contraseña invalido'}),400
+    password = user.password
+    if password != body['password']:
+        return jsonify({'msg':'Usuario o contraseña invalido'}),400
+    print(user.password)
+    access_token = create_access_token(identity=user.email)
+    return jsonify({'msg':'ok','jwt-token':access_token})
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
