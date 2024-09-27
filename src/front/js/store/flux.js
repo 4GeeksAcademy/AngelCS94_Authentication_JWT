@@ -1,3 +1,5 @@
+import Login from "../pages/Login";
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
@@ -33,6 +35,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 					console.log("Error loading message from backend", error)
 				}
 			},
+			loginUser: async (username, password, email) => {
+				const resp = await fetch(process.env.BACKEND_URL +"/login", { 
+					 method: "POST",
+					 headers: { "Content-Type": "application/json" },
+					 body: JSON.stringify({ username, password, email }) 
+				})
+		   
+				if(!resp.ok) throw Error("There was a problem in the login request")
+		   
+				if(resp.status === 401){
+					 throw("Invalid credentials")
+				}
+				else if(resp.status === 400){
+					 throw ("Invalid email or password format")
+				}
+				const data = await resp.json()
+				// Guarda el token en la localStorage
+				// También deberías almacenar el usuario en la store utilizando la función setItem
+				localStorage.setItem("jwt-token", data.token);
+		   
+				return data
+		   },
+
 			changeColor: (index, color) => {
 				//get the store
 				const store = getStore();
