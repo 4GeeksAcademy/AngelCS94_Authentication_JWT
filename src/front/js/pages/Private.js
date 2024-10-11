@@ -1,9 +1,17 @@
-import React from 'react';
-import { Link, NavLink } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 const Private = () => {
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    const token = localStorage.getItem("jwt-token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate])
   return (
-    <div>Private</div>
+    <div>Esta es una vista privada</div>
   )
 }
 

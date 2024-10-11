@@ -21,7 +21,7 @@ export const Navbar = () => {
     return (
         <nav className="navbar navbar-light bg-light">
             <div className="container">
-                <Link to="/">
+                <Link to="/home">
                     <span className="navbar-brand mb-0 h1">Home</span>
                 </Link>
                 <div className="ml-auto d-grid gap-2 d-md-flex justify-content-md-end">
@@ -34,7 +34,7 @@ export const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Link to="/login">
+                            <Link to="/">
                                 <button className="btn btn-success">Login</button>
                             </Link>
                             <Link to="/signup">

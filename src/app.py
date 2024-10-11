@@ -1,6 +1,3 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
@@ -11,7 +8,6 @@ from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
 from flask_cors import CORS
-
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 from flask_bcrypt import Bcrypt
 
@@ -87,6 +83,7 @@ def login():
     if user is None:
         return jsonify({'msg':'Usuario, email o contraseña incorrecta'}), 400
 
+    # Verificar la contraseña
     password_db = bcrypt.check_password_hash(user.password, body['password'])
     if not password_db or user.email != body['email']:
         return jsonify({'msg':'Usuario, email o contraseña incorrecta'}), 400
@@ -101,15 +98,12 @@ def login():
 @app.route('/signup', methods=['POST'])
 def signup():
     body = request.get_json(silent=True)
-    if body is None:
-        return jsonify({
-            'msg': 'Debes enviar los siguientes campos:',
-            'campos': {
-                'username': 'requerido',
-                'email': 'requerido',
-                'password': 'requerido'
-            }
-        }), 400
+
+    # Verificar si el email o el username ya existen
+    if User.query.filter_by(email=body['email']).first() is not None:
+        return jsonify({'msg': 'El email ya está en uso'}), 400
+    if User.query.filter_by(username=body['username']).first() is not None:
+        return jsonify({'msg': 'El nombre de usuario ya está en uso'}), 400
 
     if 'username' not in body:
         return jsonify({'msg':'debes enviar el campo username'}), 400
@@ -123,6 +117,7 @@ def signup():
     new_user.email = body['email']
     new_user.is_active = True
 
+    # Hash de la contraseña con bcrypt
     pw_hash = bcrypt.generate_password_hash(body['password']).decode('utf-8')
     new_user.password = pw_hash
 
